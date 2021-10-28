@@ -43,16 +43,18 @@
     step-5))
 
 (s/def ::digit (set (range 0 10)))
-(s/def ::nhs-number (s/and string?
-                           #(re-matches #"\d{10}" %)
-                           #(modulus-11? %)))
 
 
 
 (defn nhs-number?
   "Checks whether numeric string is an NHS Number"
   [number]
-  (s/valid? ::nhs-number number))
+  (if (or (not (string? number))
+          (nil? (re-matches #"\d{10}" number)))
+    "Not a numeric string of length 10"
+    (if (modulus-11? number)
+      true
+      "Check digit doesn't match")))
 
 (def digit-generator (s/gen ::digit))
 
@@ -72,7 +74,7 @@
 (comment
   (def correct-examples ["5990128088" "1275988113" "4536026665"])
 
-  (def wrong-examples ["5990128087" "4536016660"])
+  (def wrong-examples ["5990128087" "4536016660" "453601666a" "45360166611111"])
 
   (map nhs-number? correct-examples)
 
